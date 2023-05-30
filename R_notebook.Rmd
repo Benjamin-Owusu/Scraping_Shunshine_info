@@ -1,0 +1,117 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+## List of cities by sunshine duration
+```{r}
+
+rm(list=ls())
+library(tidyverse)
+library(rvest)
+
+
+```
+
+
+## loading the url and reading the html data
+```{r}
+url <- "https://en.wikipedia.org/wiki/List_of_cities_by_sunshine_duration"
+
+tab <- read_html(url)
+
+All_list <- tab %>% html_elements("table") %>% html_table()
+
+```
+
+
+## scraping the individual continents
+```{r}
+Africa <- All_list[[3]] %>% select(!Ref.) %>%
+         mutate(Continent = "Africa") %>% 
+         select(Country, City, Continent, everything())
+
+ 
+Asia <- All_list[[4]] %>% select(!Ref.) %>%
+          mutate(Continent = "Asia") %>% 
+         select(Country, City, Continent, everything())
+
+Europe <- All_list[[5]] %>% select(!Ref.) %>%
+          mutate(Continent = "Europe") %>% 
+         select(Country, City, Continent, everything())
+
+North_America <- All_list[[6]] %>% select(!Ref.) %>%
+          mutate(Continent = "North_America") %>% 
+         select(Country, City, Continent, everything())
+
+South_America <- All_list[[7]] %>% select(!Ref.) %>%
+          mutate(Continent = "South_America") %>% 
+         select(Country, City, Continent, everything())
+
+Oceania <- All_list[[8]] %>% select(!Ref.) %>%
+          mutate(Continent = "Oceania") %>% 
+         select(Country, City, Continent, everything())
+```
+
+
+## Combining data into one master data
+```{r}
+
+master_data <- bind_rows(Africa, Asia, Europe,North_America,
+                         South_America, Oceania)
+head(master_data)
+tail(master_data)
+
+```
+
+```{r}
+Africa_mean <- master_data %>% filter(Continent == "Africa") %>%
+              summarise(across(where(is.numeric), ~mean(.x)))
+Asia_mean <- master_data %>% filter(Continent == "Asia") %>%
+              summarise(across(where(is.numeric), ~mean(.x)))
+Europe_mean <- master_data %>% filter(Continent == "Europe") %>%
+              summarise(across(where(is.numeric), ~mean(.x)))
+NA_mean <- master_data %>% filter(Continent == "North_America") %>%
+              summarise(across(where(is.numeric), ~mean(.x)))
+SA_mean <- master_data %>% filter(Continent == "South_America") %>%
+              summarise(across(where(is.numeric), ~mean(.x)))
+Oceania_mean <- master_data %>% filter(Continent == "Oceania") %>%
+              summarise(across(where(is.numeric), ~mean(.x)))
+
+Average_sunshine<- bind_rows(Africa_mean, Asia_mean,Europe_mean,NA_mean,
+          SA_mean,Oceania_mean ) %>% mutate(Continents = 
+                  c("Africa", "Asia",
+                "Europe","North_America",
+                 "South_America","Oceania")) %>%
+                select(Continents, everything())
+
+  ploty <- Average_sunshine %>% pivot_longer(
+                            names_to = "continets" ,
+                            values_to = "Value" , -Continents)
+  
+  
+  
+  
+          
+ mean_sunshine <- function(a){
+  average <- master_data %>% filter(Continent == "a") %>%
+    summarise(across(where(is.numeric), ~mean(.x)))
+  return(average)
+ }
+ 
+
+ 
+```
+
+
+
+
+```{r, fig.align='center'}
+ggplot(ploty, aes(continets, Value))  +
+   geom_line(aes(color = Continents, group = Continents), size = 1)+
+  scale_color_manual(values = c("red", "blue","purple", "green3",
+                                "black", "yellow"))+
+   xlab("Year")+ ggtitle(" Government debt to GDP ratio ")
+```
+
