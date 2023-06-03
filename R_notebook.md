@@ -1,34 +1,54 @@
----
-title: "R Notebook"
-output: rmarkdown::github_document
----
-
+R Notebook
+================
 
 ## List of cities by sunshine duration
-```{r}
 
+``` r
 rm(list=ls())
 library(tidyverse)
-library(rvest)
-
-
 ```
 
+    ## Warning: Paket 'ggplot2' wurde unter R Version 4.2.3 erstellt
+
+    ## Warning: Paket 'tibble' wurde unter R Version 4.2.3 erstellt
+
+    ## Warning: Paket 'dplyr' wurde unter R Version 4.2.3 erstellt
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.2     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+``` r
+library(rvest)
+```
+
+    ## 
+    ## Attache Paket: 'rvest'
+    ## 
+    ## Das folgende Objekt ist maskiert 'package:readr':
+    ## 
+    ##     guess_encoding
 
 ## loading the url and reading the html data
-```{r}
+
+``` r
 url <- "https://en.wikipedia.org/wiki/List_of_cities_by_sunshine_duration"
 
 tab <- read_html(url)
 
 All_list <- tab %>% html_elements("table") %>% html_table()
-
-
 ```
 
-
 ## scraping the individual continents
-```{r}
+
+``` r
 Africa <- All_list %>% pluck(3)%>% select(!Ref.) %>%
          mutate(Continent = "Africa") %>% 
          select(Country, City, Continent, everything())
@@ -55,19 +75,41 @@ Oceania <- All_list %>% pluck(8) %>% select(!Ref.) %>%
          select(Country, City, Continent, everything())
 ```
 
-
 ## Combining data into one master data
-```{r}
 
+``` r
 master_data <- bind_rows(Africa, Asia, Europe,North_America,
                          South_America, Oceania)
 head(master_data)
-tail(master_data)
-
 ```
 
+    ## # A tibble: 6 × 16
+    ##   Country  City  Continent   Jan   Feb   Mar   Apr   May   Jun   Jul   Aug   Sep
+    ##   <chr>    <chr> <chr>     <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+    ## 1 Ivory C… Gagn… Africa     183   180   196   188   181   118    97    80   110 
+    ## 2 Ivory C… Boua… Africa     242   224   219   194   208   145   104    82   115 
+    ## 3 Ivory C… Abid… Africa     223   223   239   214   205   128   137   125   139 
+    ## 4 Ivory C… Odie… Africa     242   220.  217.  215.  249.  222.  184.  174.  185.
+    ## 5 Ivory C… Ferké Africa     279   249   253   229   251   221   183   151   173 
+    ## 6 Benin    Coto… Africa     214.  210   223.  219   214.  141   136.  149.  165 
+    ## # ℹ 4 more variables: Oct <dbl>, Nov <dbl>, Dec <dbl>, Year <chr>
 
-```{r}
+``` r
+tail(master_data)
+```
+
+    ## # A tibble: 6 × 16
+    ##   Country  City  Continent   Jan   Feb   Mar   Apr   May   Jun   Jul   Aug   Sep
+    ##   <chr>    <chr> <chr>     <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+    ## 1 New Zea… Chri… Oceania    224.  190.  177.  156.  133. 118.   125.  149   167.
+    ## 2 New Zea… Well… Oceania    240.  205   195.  154.  126  102.   111.  137.  163.
+    ## 3 New Zea… Hami… Oceania    230.  193.  193.  165.  138. 113.   126.  144.  148.
+    ## 4 New Zea… Auck… Oceania    229.  195.  189.  157.  140. 110.   128.  143.  149.
+    ## 5 Fiji     Suva  Oceania    192.  178   170.  153   146. 141    136.  143.  135 
+    ## 6 New Zea… Dune… Oceania    180.  158   146.  126.  108.  95.3  111.  122.  137.
+    ## # ℹ 4 more variables: Oct <dbl>, Nov <dbl>, Dec <dbl>, Year <chr>
+
+``` r
 Africa_mean <- master_data %>% filter(Continent == "Africa") %>%
               summarise(across(where(is.numeric), ~mean(.x)))
 Asia_mean <- master_data %>% filter(Continent == "Asia") %>%
@@ -101,15 +143,9 @@ ploty1 <- Average_sunshine %>% pivot_longer(
     summarise(across(where(is.numeric), ~mean(.x)))
   return(average)
  }
- 
-
- 
 ```
 
-
-
-
-```{r, fig.align='center'}
+``` r
 library(lubridate)
 ploty1$Months <- parse_date_time((ploty1$Months), orders = "m") 
 
@@ -123,3 +159,10 @@ ggplot(ploty1, aes(Month, Value))  +
    xlab("Months")+ ggtitle(" Average monthly sunshine")
 ```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+<img src="R_notebook_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
