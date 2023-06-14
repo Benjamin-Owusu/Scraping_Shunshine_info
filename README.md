@@ -1,4 +1,4 @@
-# Scraping_Shunshine_info
+# Scraping_Sunshine_info
 In this project, I  scraped sunshine data from wikipedia using R-vest package.
 The link to the data can be found at https://en.wikipedia.org/wiki/List_of_cities_by_sunshine_duration which depicts 
 the list of cities by sunshine duration.
