@@ -3,6 +3,8 @@ R Notebook
 
 ## List of cities by sunshine duration
 
+#### I loaded thhe main packages (Tidyverse and rvest)
+
 ``` r
 rm(list=ls())
 library(tidyverse)
@@ -38,6 +40,8 @@ library(rvest)
 
 ## loading the url and reading the html data
 
+#### Here I link the URL and read it into R. Data exist in table form so its easy to define htm/element or nodes as “table”. The output is therefore a list
+
 ``` r
 url <- "https://en.wikipedia.org/wiki/List_of_cities_by_sunshine_duration"
 
@@ -47,6 +51,8 @@ All_list <- tab %>% html_elements("table") %>% html_table()
 ```
 
 ## scraping the individual continents
+
+#### Next I pluck each continent out of the list using their position in the list
 
 ``` r
 Africa <- All_list %>% pluck(3)%>% select(!Ref.) %>%
@@ -76,6 +82,8 @@ Oceania <- All_list %>% pluck(8) %>% select(!Ref.) %>%
 ```
 
 ## Combining data into one master data
+
+#### I combine all the continents (plucked from the list) into one master dataframe.
 
 ``` r
 master_data <- bind_rows(Africa, Asia, Europe,North_America,
@@ -109,6 +117,8 @@ tail(master_data)
     ## 6 New Zea… Dune… Oceania    180.  158   146.  126.  108.  95.3  111.  122.  137.
     ## # ℹ 4 more variables: Oct <dbl>, Nov <dbl>, Dec <dbl>, Year <chr>
 
+#### Next I tried to compute the average sunshine for each continent by computing their monthly means.
+
 ``` r
 Africa_mean <- master_data %>% filter(Continent == "Africa") %>%
               summarise(across(where(is.numeric), ~mean(.x)))
@@ -133,17 +143,9 @@ Average_sunshine<- bind_rows(Africa_mean, Asia_mean,Europe_mean,NA_mean,
 ploty1 <- Average_sunshine %>% pivot_longer(
                             names_to = "Months" ,
                             values_to = "Value" , -Continents)
-  
-  
-  
-  
-          
- mean_sunshine <- function(a){
-  average <- master_data %>% filter(Continent == "a") %>%
-    summarise(across(where(is.numeric), ~mean(.x)))
-  return(average)
- }
 ```
+
+#### Finally I provide a plot of the average monthly sunshine. One can notice that between May and August, North America and Europe have the average highest sunshine. Europe recorded the lowest sunshine in Winter (From October to April). African has quite a sturdy amount of sunshine throughout the year.
 
 ``` r
 library(lubridate)
